@@ -1,0 +1,13 @@
+//Rules
+
+//Avec intégrine
+'FN1_ITGA5B1' FN1(RGD[.], LRGD[.]), ITGA5B1(x[.], LAST[.]) -> FN1(RGD[1], LRGD[2]), ITGA5B1(x[1], LAST[2])  @ 'high_affinity_bin'
+'FN1(RGD)_FN1' FN1(RGD[_], Nter[.]), FN1(III1[.],Nter[.]) -> FN1(RGD[_], Nter[1]), FN1(III1[1], Nter[.])  @ 'high_affinity_bin'
+'FN1(RGD)_ITGA5B1_FN1' FN1(RGD[_],Nter[1],LRGD[2]), ITGA5B1(x[_],LAST[2]), FN1(III1[1], Nter[.], LRGD[.]) -> FN1(RGD[_],Nter[1], LRGD[.]), ITGA5B1(x[_],LAST[2]), FN1(III1[1],Nter[.],LRGD[2]) @ inf
+
+
+//Cas sans intégrine 
+
+'FN1(Nter)_FN1' FN1(Nter[.]), FN1(III1[.], LRGD[.], Nter[.]) -> FN1(Nter[1]), FN1(III1[1], LRGD[.], Nter[.]) @ 'high_affinity_bin'
+'FN1_FN1(LRGD)' FN1(Nter[.],  LRGD[1]), ITGA5B1( LAST[1]), FN1(III1[.],Nter[.],LRGD[.]) -> FN1(Nter[1], LRGD[.]), ITGA5B1( LAST[2]), FN1(III1[1],Nter[.],LRGD[2]) @ inf
+'FN1_FN1(RGD)_ITGA5B1'  FN1(RGD[1],III1[.],Nter[.],LRGD[2]), ITGA5B1(x[1], LAST[2]), FN1(Nter[.], LRGD[.]) ->  FN1(Nter[1], LRGD[.]), FN1(RGD[2],III1[1],Nter[.],LRGD[3]), ITGA5B1(x[2], LAST[3]) @ 'high_affinity_bin'

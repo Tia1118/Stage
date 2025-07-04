@@ -1,0 +1,149 @@
+//FN1 
+
+//Hypothèse se dépile 1 à 1 de la droite vers la gauche ou le lien fictif de l'intégrine doit toujours être connecté au dernier FN1 de la chaîne
+
+
+//unit Definitions
+%var: 'g' 1
+%var: 'kg' 1000*g
+%var: 'mg' 0.001*g
+%var: 'mass_unit' kg
+%var: 'microg' 0.001*mg
+
+%var: 'mole' 6.022e23
+%var: 'n_avogadro' 6.022
+
+
+
+%var: 's' 1
+%var: 'mn' 60*s
+%var: 'h' 60*mn
+%var: 'd' 24*h
+
+%var: 'time_unit' h
+
+%var: 'particle' 1
+%var: 'particle_quantity_unit' particle
+/* was million in the DYLISS repository*/
+/* please fix.*/
+/* please change the mass in parameters accordingly (we cannot simulate so many particles)*/
+
+
+//Parameters
+%var: 'scale' 1
+%var: 'system_mass' 0.00000000001*scale*microg
+
+
+// Signatures
+
+%agent: FN1(LRGD,Nter,RGD,III1)
+%agent: ITGA5B1(LAST,x)
+
+
+//Rules (Association and Dissociation)
+
+//Association
+
+// Les intégrines α5β1, récepteurs classiques de la fibronectine (FN), assurent non seulement l’adhésion cellulaire, mais jouent également un rôle essentiel dans l’assemblage de la matrice extracellulaire (MEC). Cet assemblage est multiphase. Il commence par la liaison de la FN1 soluble au récepteur ITGA5B1 activé à la surface de la cellule (règle FN1_ITGA5B1). Cette étape est nécessaire mais pas suffisante : des événements dits "post-occupation", impliquant le domaine cytoplasmique de la sous-unité β1 et nécessitant un cytosquelette d'actine intact, déclenchent ensuite l'organisation de la MEC. Une fois que FN1 est liée via son domaine RGD, l'intégrine α5β1 quitte les contacts focaux pour migrer vers les adhésions fibrillaires, permettant ainsi la fibrillogenèse. Cette migration, couplée à la tension intracellulaire, étire la FN1 et expose des sites cryptiques d’auto-association, notamment dans le domaine N-terminal 70K, qui comprend la région d’assemblage de la matrice (règle FN1(RGD)_FN1).
+
+// À ce stade, d’autres dimères de fibronectine, également recrutés à la membrane, interagissent entre eux par des contacts entre les domaines N-ter et les modules de type III comme III1. Ces interactions stabilisent la pré-fibrille naissante, en particulier dans des complexes plus structurés impliquant à la fois l’intégrine, le site RGD, et d’autres molécules de FN1 (règle FN1(RGD)_ITGA5B1_FN1).
+
+//L'auto-association de la FN1 est initiée à la membrane, souvent grâce à des interactions N-ter ↔ III1, favorisées par l’allongement mécanique de FN1. Ces interactions permettent de convertir la FN1 soluble en réseau fibrillaire insoluble, un processus dirigé par la cellule, essentiel pour la formation d’une matrice structurée.
+
+// La région N-terminale de 70 kDa de FN1 interagit avec des structures linéaires à la surface des cellules pour amorcer le réseau. Les intégrines de type α5β1 contrôlent l’organisation de ce réseau en coordonnant les interactions FN1–FN1, ce qui permet une progression ordonnée de l’assemblage.
+
+// Pour les règles de dissociation de FN1_ITGA5B1_FN1, une règle de dissociation pour ITGA5B1(LRGD) et FN1 et deux règles de dissociation pour FN1_FN1 en fonction de la taille des polymères et l'état des sites d'action.
+
+
+'FN1_ITGA5B1' FN1(RGD[.], LRGD[.]), ITGA5B1(x[.], LAST[.]) -> FN1(RGD[1], LRGD[2]), ITGA5B1(x[1], LAST[2])  @ 'high_affinity_bin' //Association/interaction de la fibronectine et de l'intégrine qui va déclecher la fibrillogenèse
+'FN1(RGD)_FN1' FN1(LRGD[_], Nter[.]), FN1(III1[.],Nter[.]) -> FN1(LRGD[_], Nter[1]), FN1(III1[1], Nter[.])  @ 'high_affinity_bin'// Initiation d'un noyau de polymérisation 
+'FN1(RGD)_ITGA5B1_FN1' FN1(Nter[1],LRGD[2]), ITGA5B1(LAST[2]), FN1(III1[1], Nter[.], LRGD[.]) -> FN1(Nter[1], LRGD[.]), ITGA5B1(LAST[2]), FN1(III1[1],Nter[.],LRGD[2]) @ inf //transfert du point d'ancrage cellulaire d'une molécule de FN1 à une autre pendant la polymérisation
+
+                                                                                                          
+//Dissociation
+
+'FN1(Nter)_FN1_dissociate1' FN1(Nter[1]) FN1(III1[1], Nter[.], LRGD[.]) -> FN1(Nter[.]), FN1(III1[.], Nter[.], LRGD[.]) @ 'high_affinity_un'
+'FN1(Nter)_FN1_ITGA5B1_dissociate2' FN1(Nter[1], LRGD[.]), FN1(III1[1], Nter[.], LRGD[2]), ITGA5B1(LAST[2]) -> FN1(Nter[1], LRGD[2]), FN1(III1[1], Nter[.]), ITGA5B1(LAST[2]) @ 'high_affinity_un'
+'FN1_FN1_dissociate3' FN1(Nter[1]), FN1(III1[1], Nter[.], RGD[_], LRGD[_]) -> FN1(Nter[.]), FN1(III1[.], Nter[.], RGD [_], LRGD[_]) @ 'low_affinity_un'
+//'ITGA5B1_ITG' ITGA5B1(x[_], LAST[_]) -> ITGA5B1(x[.], LAST[.]) @ 
+
+//Variables 
+%var: 'coef_time_inv' 1/time_unit
+%var: 'coef_amount' system_mass/mass_unit*particle_quantity_unit
+%var: 'coef_bin' coef_time_inv /coef_amount
+%var: 'coef_un' coef_time_inv
+%var: 'slow'  1E-20
+/*  coef_amount 2E-21*/
+%var: 'high_affinity_bin' 0.01*coef_bin*slow
+%var: 'low_affinity_un' 0.0001*coef_un
+%var: 'high_affinity_un' 0.01*coef_un
+%var: 'very_high_affinity_un' 0.1*coef_un
+
+
+//Initial conditions
+%var: 'FN1_mg_per_kg' 110.000000
+%var: 'FN1_mw' 262625.000000
+%var: 'FN1_init' 'FN1_mg_per_kg'*'FN1_mw'*'n_avogadro'*'mole'*('mg'/'kg')*'coef_amount'
+
+%var: 'ITGA5B1_mg_per_kg' 19.900000
+%var: 'ITGA5B1_mw' 114536.000000
+%var: 'ITGA5B1_init' 'ITGA5B1_mg_per_kg'*'ITGA5B1_mw'*'n_avogadro'*'mole'*('mg'/'kg')*'coef_amount'
+
+%init: 'FN1_init' FN1() 
+%init: 'ITGA5B1_init' ITGA5B1() 
+
+
+
+// Observables
+%obs: 'nb_FN1' |FN1()|                           // nombre total de FN1
+%obs: 'nb_ITGA5B1' |ITGA5B1()|                   // nombre total de ITGA5B1
+%obs: 'complexe_FN1_ITGA5B1' |FN1(RGD[1]), ITGA5B1(x[1])|  // complexes formés
+%obs: 'nb_complexes' |ITGA5B1(x[1], LAST[2]), FN1(RGD[1], LRGD[2])|  // complexes liés aux 2 sites
+
+
+// Taille 1 : FN1 isolé (aucun site lié)
+%obs: 'FN1_size_1' |FN1( Nter[.],III1[.])|
+
+
+// Taille 2: FN1 avec 2 sites liés 
+%obs: 'FN1_size_2' |FN1(Nter[1], III1[.]), FN1(Nter[.], III1[1])|
+
+
+//Taille 3: FN1 avec 3 sites liés 
+%obs: 'FN1_size_3' |FN1(Nter[1], III1[.]), FN1(Nter[2], III1[1]), FN1(Nter[.], III1[2])|
+
+
+//Taille 4: FN1 avec 4 sites liés
+%obs: 'FN1_size_4' |FN1(Nter[1], III1[.]), FN1(Nter[2], III1[1]), FN1(Nter[3], III1[2]), FN1(Nter[.], III1[3])|
+
+
+//Taille 5: FN1 avec 5 sites liés
+%obs: 'FN1_size_5' |FN1(Nter[1], III1[.]), FN1(Nter[2], III1[1]), FN1(Nter[3], III1[2]), FN1(Nter[4], III1[3]), FN1(Nter[.], III1[4])|
+
+
+//Taille 6: FN1 avec 6 sites liés
+%obs: 'FN1_size_6' |FN1(Nter[1], III1[.]), FN1(Nter[2], III1[1]), FN1(Nter[3], III1[2]), FN1(Nter[4], III1[3]), FN1(Nter[5], III1[4]), FN1(Nter[.], III1[5])|
+
+
+//Taille 7: FN1 avec 7 sites liés
+%obs: 'FN1_size_7' |FN1(Nter[1], III1[.]), FN1(Nter[2], III1[1]), FN1(Nter[3], III1[2]), FN1(Nter[4], III1[3]), FN1(Nter[5], III1[4]), FN1(Nter[6], III1[5]), FN1(Nter[.], III1[6])|
+
+
+//Taille 8: FN1 avec 8 sites liés
+%obs: 'FN1_size_8' |FN1(Nter[1], III1[.]), FN1(Nter[2], III1[1]), FN1(Nter[3], III1[2]), FN1(Nter[4], III1[3]), FN1(Nter[5], III1[4]), FN1(Nter[6], III1[5]), FN1(Nter[7], III1[6]), FN1(Nter[.], III1[7])|
+
+
+//Taille 9: FN1 avec 9 sites liés
+%obs: 'FN1_size_9' |FN1(Nter[1], III1[.]), FN1(Nter[2], III1[1]), FN1(Nter[3], III1[2]), FN1(Nter[4], III1[3]), FN1(Nter[5], III1[4]), FN1(Nter[6], III1[5]), FN1(Nter[7], III1[6]), FN1(Nter[8], III1[7]), FN1(Nter[.], III1[8])|
+
+
+//Taille 10: FN1 avec 10 sites liés
+%obs: 'FN1_size_10' |FN1(Nter[1], III1[.]), FN1(Nter[2], III1[1]), FN1(Nter[3], III1[2]), FN1(Nter[4], III1[3]), FN1(Nter[5], III1[4]), FN1(Nter[6], III1[5]), FN1(Nter[7], III1[6]), FN1(Nter[8], III1[7]), FN1(Nter[9], III1[8]), FN1(Nter[.], III1[9])|
+
+
+//Taille 10: FN1 avec avec plus de 10 sites 
+%obs: 'FN1_size_10plus' |FN1(Nter[1], III1[.]), FN1(Nter[2], III1[1]), FN1(Nter[3], III1[2]), FN1(Nter[4], III1[3]), FN1(Nter[5], III1[4]), FN1(Nter[6], III1[5]), FN1(Nter[7], III1[6]), FN1(Nter[8], III1[7]), FN1(Nter[9], III1[8]), FN1(Nter[10], III1[9]), FN1(Nter[11], III1[10]), FN1(Nter[.], III1[11])|
+
+
+
+
