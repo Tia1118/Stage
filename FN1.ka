@@ -1,6 +1,7 @@
 //FN1 
 
-//Hypothèse se dépile 1 à 1 de la droite vers la gauche ou le lien fictif de l'intégrine doit toujours être connecté au dernier FN1 de la chaîne
+//Hypothèse: se dépile 1 à 1 de la droite vers la gauche ou le lien fictif de l'intégrine doit toujours être connecté au dernier FN1 de la chaîne
+//Ypothèse: plus le taux d'affinité est bas plus les chaînes de +10 seront élevées
 
 
 //unit Definitions
@@ -57,15 +58,15 @@
 
 'FN1_ITGA5B1' FN1(RGD[.], LRGD[.]), ITGA5B1(x[.], LAST[.]) -> FN1(RGD[1], LRGD[2]), ITGA5B1(x[1], LAST[2])  @ 'high_affinity_bin' //Association/interaction de la fibronectine et de l'intégrine qui va déclecher la fibrillogenèse
 'FN1(RGD)_FN1' FN1(LRGD[_], Nter[.]), FN1(III1[.],Nter[.]) -> FN1(LRGD[_], Nter[1]), FN1(III1[1], Nter[.])  @ 'high_affinity_bin'// Initiation d'un noyau de polymérisation 
-'FN1(RGD)_ITGA5B1_FN1' FN1(Nter[1],LRGD[2]), ITGA5B1(LAST[2]), FN1(III1[1], Nter[.], LRGD[.]) -> FN1(Nter[1], LRGD[.]), ITGA5B1(LAST[2]), FN1(III1[1],Nter[.],LRGD[2]) @ inf //transfert du point d'ancrage cellulaire d'une molécule de FN1 à une autre pendant la polymérisation
+'FN1(RGD)_ITGA5B1_FN1' FN1(Nter[1],LRGD[2]), ITGA5B1(LAST[2]), FN1(III1[1], Nter[.], LRGD[.]) -> FN1(Nter[1], LRGD[.]), ITGA5B1(LAST[2]), FN1(III1[1],Nter[.],LRGD[2]) @ 'inf' //transfert du point d'ancrage cellulaire d'une molécule de FN1 à une autre pendant la polymérisation
 
                                                                                                           
 //Dissociation
 
-'FN1(Nter)_FN1_dissociate1' FN1(Nter[1]) FN1(III1[1], Nter[.], LRGD[.]) -> FN1(Nter[.]), FN1(III1[.], Nter[.], LRGD[.]) @ 'high_affinity_un'
-'FN1(Nter)_FN1_ITGA5B1_dissociate2' FN1(Nter[1], LRGD[.]), FN1(III1[1], Nter[.], LRGD[2]), ITGA5B1(LAST[2]) -> FN1(Nter[1], LRGD[2]), FN1(III1[1], Nter[.]), ITGA5B1(LAST[2]) @ 'high_affinity_un'
-'FN1_FN1_dissociate3' FN1(Nter[1]), FN1(III1[1], Nter[.], RGD[_], LRGD[_]) -> FN1(Nter[.]), FN1(III1[.], Nter[.], RGD [_], LRGD[_]) @ 'low_affinity_un'
-//'ITGA5B1_ITG' ITGA5B1(x[_], LAST[_]) -> ITGA5B1(x[.], LAST[.]) @ 
+'FN1(Nter)_FN1_dissociate1' FN1(Nter[1]) FN1(III1[1], Nter[.], LRGD[.]) -> FN1(Nter[.]), FN1(III1[.], Nter[.], LRGD[.]) @ 'low_affinity_un'
+'FN1(Nter)_FN1_ITGA5B1_dissociate2' FN1(Nter[1], LRGD[.]), FN1(III1[1], Nter[.], LRGD[2]), ITGA5B1(LAST[2]) -> FN1(Nter[1], LRGD[2]), FN1(III1[1], Nter[.]), ITGA5B1(LAST[2]) @ 'low_affinity_un'
+'FN1_FN1_dissociate3' FN1(Nter[1]), FN1(III1[1], Nter[.], RGD[2], LRGD[3]),ITGA5B1(x[2], LAST[3]) -> FN1(Nter[.]), FN1(III1[.], Nter[.], RGD [2], LRGD[3]) @ 'low_affinity_un'
+'ITGA5B1_ITG' ITGA5B1(x[_], LAST[_]) -> ITGA5B1(x[.], LAST[.]) @ 'low_affinity_un'
 
 //Variables 
 %var: 'coef_time_inv' 1/time_unit
@@ -101,44 +102,23 @@
 %obs: 'nb_complexes' |ITGA5B1(x[1], LAST[2]), FN1(RGD[1], LRGD[2])|  // complexes liés aux 2 sites
 
 
-// Taille 1 : FN1 isolé (aucun site lié)
-%obs: 'FN1_size_1' |FN1( Nter[.],III1[.])|
-
 
 // Taille 2: FN1 avec 2 sites liés 
 %obs: 'FN1_size_2' |FN1(Nter[1], III1[.]), FN1(Nter[.], III1[1])|
 
-
-//Taille 3: FN1 avec 3 sites liés 
-%obs: 'FN1_size_3' |FN1(Nter[1], III1[.]), FN1(Nter[2], III1[1]), FN1(Nter[.], III1[2])|
 
 
 //Taille 4: FN1 avec 4 sites liés
 %obs: 'FN1_size_4' |FN1(Nter[1], III1[.]), FN1(Nter[2], III1[1]), FN1(Nter[3], III1[2]), FN1(Nter[.], III1[3])|
 
 
-//Taille 5: FN1 avec 5 sites liés
-%obs: 'FN1_size_5' |FN1(Nter[1], III1[.]), FN1(Nter[2], III1[1]), FN1(Nter[3], III1[2]), FN1(Nter[4], III1[3]), FN1(Nter[.], III1[4])|
-
 
 //Taille 6: FN1 avec 6 sites liés
 %obs: 'FN1_size_6' |FN1(Nter[1], III1[.]), FN1(Nter[2], III1[1]), FN1(Nter[3], III1[2]), FN1(Nter[4], III1[3]), FN1(Nter[5], III1[4]), FN1(Nter[.], III1[5])|
 
 
-//Taille 7: FN1 avec 7 sites liés
-%obs: 'FN1_size_7' |FN1(Nter[1], III1[.]), FN1(Nter[2], III1[1]), FN1(Nter[3], III1[2]), FN1(Nter[4], III1[3]), FN1(Nter[5], III1[4]), FN1(Nter[6], III1[5]), FN1(Nter[.], III1[6])|
-
-
 //Taille 8: FN1 avec 8 sites liés
 %obs: 'FN1_size_8' |FN1(Nter[1], III1[.]), FN1(Nter[2], III1[1]), FN1(Nter[3], III1[2]), FN1(Nter[4], III1[3]), FN1(Nter[5], III1[4]), FN1(Nter[6], III1[5]), FN1(Nter[7], III1[6]), FN1(Nter[.], III1[7])|
-
-
-//Taille 9: FN1 avec 9 sites liés
-%obs: 'FN1_size_9' |FN1(Nter[1], III1[.]), FN1(Nter[2], III1[1]), FN1(Nter[3], III1[2]), FN1(Nter[4], III1[3]), FN1(Nter[5], III1[4]), FN1(Nter[6], III1[5]), FN1(Nter[7], III1[6]), FN1(Nter[8], III1[7]), FN1(Nter[.], III1[8])|
-
-
-//Taille 10: FN1 avec 10 sites liés
-%obs: 'FN1_size_10' |FN1(Nter[1], III1[.]), FN1(Nter[2], III1[1]), FN1(Nter[3], III1[2]), FN1(Nter[4], III1[3]), FN1(Nter[5], III1[4]), FN1(Nter[6], III1[5]), FN1(Nter[7], III1[6]), FN1(Nter[8], III1[7]), FN1(Nter[9], III1[8]), FN1(Nter[.], III1[9])|
 
 
 //Taille 10: FN1 avec avec plus de 10 sites 
